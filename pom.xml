@@ -5,16 +5,16 @@
 	<parent>
 		<groupId>org.scijava</groupId>
 		<artifactId>pom-scijava</artifactId>
-		<version>19.2.0</version>
+		<version>21.0.0</version>
 		<relativePath />
 	</parent>
 
 	<groupId>net.imagej</groupId>
-	<artifactId>imagej-mesh</artifactId>
-	<version>0.6.1-SNAPSHOT</version>
+	<artifactId>imagej-mesh-io</artifactId>
+	<version>0.1.0-SNAPSHOT</version>
 
-	<name>ImageJ Mesh</name>
-	<description>3D mesh structures for ImageJ.</description>
+	<name>ImageJ Mesh I/O plugins</name>
+	<description>I/O plugins for ImageJ meshes.</description>
 	<url>https://imagej.net/ImageJ_Mesh</url>
 	<inceptionYear>2016</inceptionYear>
 	<organization>
@@ -90,22 +90,22 @@
 	</mailingLists>
 
 	<scm>
-		<connection>scm:git:git://github.com/imagej/imagej-mesh</connection>
-		<developerConnection>scm:git:git@github.com:imagej/imagej-mesh</developerConnection>
+		<connection>scm:git:git://github.com/imagej/imagej-mesh-io</connection>
+		<developerConnection>scm:git:git@github.com:imagej/imagej-mesh-io</developerConnection>
 		<tag>HEAD</tag>
-		<url>https://github.com/imagej/imagej-mesh</url>
+		<url>https://github.com/imagej/imagej-mesh-io</url>
 	</scm>
 	<issueManagement>
 		<system>GitHub Issues</system>
-		<url>https://github.com/imagej/imagej-mesh/issues</url>
+		<url>https://github.com/imagej/imagej-mesh-io/issues</url>
 	</issueManagement>
 	<ciManagement>
 		<system>Travis CI</system>
-		<url>https://travis-ci.org/imagej/imagej-mesh</url>
+		<url>https://travis-ci.com/imagej/imagej-mesh-io</url>
 	</ciManagement>
 
 	<properties>
-		<package-name>net.imagej.mesh</package-name>
+		<package-name>net.imagej.mesh.io</package-name>
 
 		<license.licenseName>bsd_2</license.licenseName>
 		<license.copyrightOwners>University of Idaho, Royal Veterinary College, and
@@ -114,6 +114,7 @@ Board of Regents of the University of Wisconsin-Madison.</license.copyrightOwner
 		<!-- NB: Deploy releases to the ImageJ Maven repository. -->
 		<releaseProfiles>deploy-to-imagej</releaseProfiles>
 
+		<imagej-mesh.version>0.6.0</imagej-mesh.version>
 		<jply.version>0.2.0</jply.version>
 	</properties>
 
@@ -134,37 +135,22 @@ Board of Regents of the University of Wisconsin-Madison.</license.copyrightOwner
 			<groupId>org.scijava</groupId>
 			<artifactId>scijava-common</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-		</dependency>
 
 		<!-- ImageJ dependencies -->
 		<dependency>
 			<groupId>net.imagej</groupId>
-			<artifactId>imagej-common</artifactId>
-		</dependency>
-
-		<!-- ImgLib2 dependencies -->
-		<dependency>
-			<groupId>net.imglib2</groupId>
-			<artifactId>imglib2</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.imglib2</groupId>
-			<artifactId>imglib2-algorithm</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.imglib2</groupId>
-			<artifactId>imglib2-realtransform</artifactId>
+			<artifactId>imagej-mesh</artifactId>
 		</dependency>
 
 		<!-- Additional dependencies -->
 		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-math3</artifactId>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
 		</dependency>
-
+		<dependency>
+			<groupId>net.sf.trove4j</groupId>
+			<artifactId>trove4j</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.smurn</groupId>
 			<artifactId>jply</artifactId>

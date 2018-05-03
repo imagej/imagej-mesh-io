@@ -1,6 +1,6 @@
 /*-
  * #%L
- * 3D mesh structures for ImageJ.
+ * I/O plugins for ImageJ meshes.
  * %%
  * Copyright (C) 2016 - 2018 University of Idaho, Royal Veterinary College, and
  * Board of Regents of the University of Wisconsin-Madison.
