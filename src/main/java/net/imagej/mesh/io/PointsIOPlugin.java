@@ -33,12 +33,12 @@ package net.imagej.mesh.io;
 import java.util.List;
 
 import net.imglib2.RealLocalizable;
-import net.imglib2.roi.geom.real.RealPointCollection;
 
 import org.scijava.io.IOPlugin;
 
 /**
- * A plugin which reads and/or writes {@link RealPointCollection} objects.
+ * A plugin which reads and/or writes point clouds as
+ * {@code List<RealLocalizable>} objects.
  *
  * @author Curtis Rueden
  */
