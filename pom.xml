@@ -101,7 +101,7 @@
 	</issueManagement>
 	<ciManagement>
 		<system>Travis CI</system>
-		<url>https://travis-ci.com/imagej/imagej-mesh-io</url>
+		<url>https://travis-ci.org/imagej/imagej-mesh-io</url>
 	</ciManagement>
 
 	<properties>
