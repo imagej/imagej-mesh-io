@@ -11,7 +11,7 @@
 
 	<groupId>net.imagej</groupId>
 	<artifactId>imagej-mesh-io</artifactId>
-	<version>0.1.1-SNAPSHOT</version>
+	<version>0.1.1</version>
 
 	<name>ImageJ Mesh I/O plugins</name>
 	<description>I/O plugins for ImageJ meshes.</description>
@@ -92,7 +92,7 @@
 	<scm>
 		<connection>scm:git:git://github.com/imagej/imagej-mesh-io</connection>
 		<developerConnection>scm:git:git@github.com:imagej/imagej-mesh-io</developerConnection>
-		<tag>HEAD</tag>
+		<tag>imagej-mesh-io-0.1.1</tag>
 		<url>https://github.com/imagej/imagej-mesh-io</url>
 	</scm>
 	<issueManagement>
