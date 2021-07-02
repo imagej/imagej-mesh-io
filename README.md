@@ -1,2 +1,2 @@
-[![](https://travis-ci.org/imagej/imagej-mesh-io.svg?branch=master)](https://travis-ci.org/imagej/imagej-mesh-io)
+[![](https://github.com/imagej/imagej-mesh-io/actions/workflows/build-main.yml/badge.svg)](https://github.com/imagej/imagej-mesh-io/actions/workflows/build-main.yml)
 
