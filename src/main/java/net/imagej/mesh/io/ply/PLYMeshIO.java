@@ -61,8 +61,7 @@ import gnu.trove.map.hash.TLongIntHashMap;
 
 /**
  * A plugin for reading and writing <a href=
- * "http://www.cs.virginia.edu/~gfx/Courses/2001/Advanced.spring.01/plylib/Ply.txt">PLY
- * files</a>.
+ * "https://en.wikipedia.org/wiki/PLY_(file_format)">PLY files</a>.
  * 
  * @author Kyle Harrington (University of Idaho, Moscow)
  * @author Curtis Rueden
