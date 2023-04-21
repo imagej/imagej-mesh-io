@@ -61,7 +61,7 @@ import net.imagej.mesh.Triangle;
 import net.imagej.mesh.Vertex;
 import net.imagej.mesh.Vertices;
 import net.imagej.mesh.io.MeshIOPlugin;
-import net.imagej.mesh.naive.NaiveFloatMesh;
+import net.imagej.mesh.nio.BufferMesh;
 
 /**
  * A plugin for reading and writing
@@ -286,6 +286,29 @@ public class PLYMeshIO extends AbstractIOPlugin<Mesh> implements MeshIOPlugin {
 	return os.toByteArray();
     }
 
+    /**
+     * Returns the number of vertices and faces declared in this file.
+     *
+     * @param source the path to the file.
+     * @return a new <code>int[]</code> array with 2 elements:
+     *         <ol start="0">
+     *         <li>the number of vertices.
+     *         <li>the number of faces.
+     *         </ol>
+     * @throws IOException
+     */
+    public int[] getNVerticesFaces(final String source) throws IOException {
+	final File file = new File(source);
+	final PlyReaderFile reader = new PlyReaderFile(file);
+	try {
+	    final int nVertices = reader.getElementCount("vertex");
+	    final int nTriangles = reader.getElementCount("face");
+	    return new int[] { nVertices, nTriangles };
+	} finally {
+	    reader.close();
+	}
+    }
+
     // -- IOPlugin methods --
 
     @Override
@@ -300,8 +323,12 @@ public class PLYMeshIO extends AbstractIOPlugin<Mesh> implements MeshIOPlugin {
 
     @Override
     public Mesh open(final String source) throws IOException {
-	final Mesh mesh = new NaiveFloatMesh();
-	read(new File(source), mesh);
+	final File file = new File(source);
+	final int[] nels = getNVerticesFaces(source);
+	final int nVertices = nels[0];
+	final int nTriangles = nels[1];
+	final Mesh mesh = new BufferMesh(nVertices, nTriangles);
+	read(file, mesh);
 	return mesh;
     }
 
