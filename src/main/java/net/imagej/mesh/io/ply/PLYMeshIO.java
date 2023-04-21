@@ -32,11 +32,15 @@ package net.imagej.mesh.io.ply;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.scijava.io.AbstractIOPlugin;
 import org.scijava.plugin.Plugin;
@@ -55,6 +59,7 @@ import gnu.trove.map.hash.TLongIntHashMap;
 import net.imagej.mesh.Mesh;
 import net.imagej.mesh.Triangle;
 import net.imagej.mesh.Vertex;
+import net.imagej.mesh.Vertices;
 import net.imagej.mesh.io.MeshIOPlugin;
 import net.imagej.mesh.naive.NaiveFloatMesh;
 
@@ -71,65 +76,80 @@ public class PLYMeshIO extends AbstractIOPlugin<Mesh> implements MeshIOPlugin {
     // -- PLYMeshIO methods --
 
     public void read(final File plyFile, final Mesh mesh) throws IOException {
-	PlyReader plyReader = new PlyReaderFile(plyFile);
-	plyReader = new NormalizingPlyReader(plyReader, TesselationMode.TRIANGLES, NormalMode.ADD_NORMALS_CCW,
-		TextureMode.PASS_THROUGH);
+	try (final FileInputStream is = new FileInputStream(plyFile)) {
+	    read(is, mesh);
+	}
+    }
 
-	ElementReader reader = plyReader.nextElementReader();
+    public void read(final InputStream plyIS, final Mesh mesh) throws IOException {
+	final PlyReader pr = new PlyReaderFile(plyIS);
+	final NormalizingPlyReader plyReader = new NormalizingPlyReader(pr, TesselationMode.TRIANGLES,
+		NormalMode.ADD_NORMALS_CCW, TextureMode.PASS_THROUGH);
 
+	// Data holders.
+	TIntLongHashMap vertexRowMap = null;
+	List<int[]> triangles = null;
+
+	// Iterate through the stream and add vertices.
+	ElementReader reader;
+	while ((reader = plyReader.nextElementReader()) != null) {
+	    final String elementName = reader.getElementType().getName();
+
+	    if (elementName.equals("vertex"))
+		vertexRowMap = readVertices(reader, mesh.vertices());
+	    else if (elementName.equals("face"))
+		triangles = readTriangles(reader);
+
+	    reader.close();
+	}
+	plyReader.close();
+
+	// Test.
+	if (vertexRowMap == null)
+	    throw new IOException("Could not find the 'vertex' element in file.");
+	if (triangles == null)
+	    throw new IOException("Could not find the 'face' element in file.");
+
+	// Add triangles to the mesh.
+	for (final int[] triangle : triangles) {
+	    final long v1 = vertexRowMap.get(triangle[0]);
+	    final long v2 = vertexRowMap.get(triangle[1]);
+	    final long v3 = vertexRowMap.get(triangle[2]);
+	    final float nx = 0f;
+	    final float ny = 0f;
+	    final float nz = 0f;
+	    mesh.triangles().add(v1, v2, v3, nx, ny, nz);
+	}
+    }
+
+    private List<int[]> readTriangles(final ElementReader reader) throws IOException {
+	final List<int[]> triangles = new ArrayList<>(reader.getCount());
+	Element triangle = reader.readElement();
+	while (triangle != null) {
+	    final int[] indices = triangle.getIntList("vertex_index");
+	    triangles.add(indices);
+	    triangle = reader.readElement();
+	}
+	return triangles;
+    }
+
+    private TIntLongHashMap readVertices(final ElementReader reader, final Vertices vertices) throws IOException {
 	final TIntLongHashMap rowToVertIndex = new TIntLongHashMap();
 	int vertCount = 0;
-
-	// First read vertices so we have all indices, maybe this could be more
-	// efficient
-	while (reader != null) {
-	    if (reader.getElementType().getName().equals("vertex")) {
-		Element vertex = reader.readElement();
-		while (vertex != null) {
-		    final float x = (float) vertex.getDouble("x");
-		    final float z = (float) vertex.getDouble("z");
-		    final float y = (float) vertex.getDouble("y");
-		    final float nx = (float) vertex.getDouble("nx");
-		    final float ny = (float) vertex.getDouble("ny");
-		    final float nz = (float) vertex.getDouble("nz");
-		    final float u = 0, v = 0; // TODO: texture coordinate
-		    final long vIndex = mesh.vertices().addf(x, y, z, nx, ny, nz, u, v);
-		    rowToVertIndex.put(vertCount++, vIndex);
-		    vertex = reader.readElement();
-		}
-	    }
-	    reader.close();
-	    reader = plyReader.nextElementReader();
+	Element vertex = reader.readElement();
+	while (vertex != null) {
+	    final float x = (float) vertex.getDouble("x");
+	    final float z = (float) vertex.getDouble("z");
+	    final float y = (float) vertex.getDouble("y");
+	    final float nx = (float) vertex.getDouble("nx");
+	    final float ny = (float) vertex.getDouble("ny");
+	    final float nz = (float) vertex.getDouble("nz");
+	    final float u = 0, v = 0; // TODO: texture coordinate
+	    final long vIndex = vertices.addf(x, y, z, nx, ny, nz, u, v);
+	    rowToVertIndex.put(vertCount++, vIndex);
+	    vertex = reader.readElement();
 	}
-	plyReader.close();
-
-	// Now read faces
-	plyReader = new PlyReaderFile(plyFile);
-	plyReader = new NormalizingPlyReader(plyReader, TesselationMode.TRIANGLES, NormalMode.ADD_NORMALS_CCW,
-		TextureMode.PASS_THROUGH);
-
-	reader = plyReader.nextElementReader();
-
-	// First read vertices so we have all indices.
-	// Maybe this could be more efficient.
-	while (reader != null) {
-	    if (reader.getElementType().getName().equals("face")) {
-		Element triangle = reader.readElement();
-		while (triangle != null) {
-		    final int[] indices = triangle.getIntList("vertex_index");
-		    final long v1 = rowToVertIndex.get(indices[0]);
-		    final long v2 = rowToVertIndex.get(indices[1]);
-		    final long v3 = rowToVertIndex.get(indices[2]);
-		    final float nx = 0, ny = 0, nz = 0;
-		    mesh.triangles().add(v1, v2, v3, nx, ny, nz);
-		    triangle = reader.readElement();
-		}
-	    }
-	    reader.close();
-	    reader = plyReader.nextElementReader();
-	}
-
-	plyReader.close();
+	return rowToVertIndex;
     }
 
     public byte[] writeBinary(final Mesh mesh) {
