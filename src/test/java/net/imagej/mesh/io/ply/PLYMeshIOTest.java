@@ -53,6 +53,16 @@ import net.imagej.mesh.naive.NaiveFloatMesh;
 public class PLYMeshIOTest {
 
     @Test
+    public void testOpenInputStream() throws Exception {
+	final URI meshURI = getClass().getResource("cone.ply").toURI();
+	final InputStream is = meshURI.toURL().openStream();
+	final PLYMeshIO meshIO = new PLYMeshIO();
+	final Mesh m = meshIO.open(is);
+	assertEquals(158, m.triangles().size());
+	assertEquals(81, m.vertices().size());
+    }
+
+    @Test
     public void testInputStream() throws Exception {
 	final URI meshURI = getClass().getResource("cone.ply").toURI();
 	final InputStream is = meshURI.toURL().openStream();
