@@ -35,12 +35,14 @@ import static org.junit.Assume.assumeTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.junit.Test;
 
 import net.imagej.mesh.Mesh;
+import net.imagej.mesh.naive.NaiveFloatMesh;
 
 /**
  * Tests {@link PLYMeshIO}.
@@ -49,6 +51,17 @@ import net.imagej.mesh.Mesh;
  * @author Curtis Rueden
  */
 public class PLYMeshIOTest {
+
+    @Test
+    public void testInputStream() throws Exception {
+	final URI meshURI = getClass().getResource("cone.ply").toURI();
+	final InputStream is = meshURI.toURL().openStream();
+	final Mesh m = new NaiveFloatMesh();
+	final PLYMeshIO meshIO = new PLYMeshIO();
+	meshIO.read(is, m);
+	assertEquals(158, m.triangles().size());
+	assertEquals(81, m.vertices().size());
+    }
 
     @Test
     public void testOpen() throws Exception {
