@@ -86,6 +86,51 @@ public class PLYMeshIO extends AbstractIOPlugin<Mesh> implements MeshIOPlugin {
 	final NormalizingPlyReader plyReader = new NormalizingPlyReader(pr, TesselationMode.TRIANGLES,
 		NormalMode.ADD_NORMALS_CCW, TextureMode.PASS_THROUGH);
 
+	try {
+	    read(plyReader, mesh);
+	} finally {
+	    plyReader.close();
+	}
+    }
+
+    public Mesh open(final InputStream plyIS) throws IOException {
+	final PlyReader pr = new PlyReaderFile(plyIS);
+	final NormalizingPlyReader plyReader = new NormalizingPlyReader(pr, TesselationMode.TRIANGLES,
+		NormalMode.ADD_NORMALS_CCW, TextureMode.PASS_THROUGH);
+	try {
+	    final int nVertices = plyReader.getElementCount("vertex");
+	    final int nTriangles = plyReader.getElementCount("face");
+	    final BufferMesh mesh = new BufferMesh(nVertices, nTriangles);
+
+	    read(plyReader, mesh);
+	    return mesh;
+
+	} finally {
+	    plyReader.close();
+	}
+    }
+
+    private List<int[]> readTriangles(final ElementReader reader) throws IOException {
+	final List<int[]> triangles = new ArrayList<>(reader.getCount());
+	Element triangle = reader.readElement();
+	while (triangle != null) {
+	    final int[] indices = triangle.getIntList("vertex_index");
+	    triangles.add(indices);
+	    triangle = reader.readElement();
+	}
+	return triangles;
+    }
+
+    /**
+     * Populates the content of the specified mesh with the data read from the PLY
+     * reader. It it the caller responsibility to close the reader after calling
+     * this method.
+     *
+     * @param plyReader the reader.
+     * @param mesh      the mesh to populate.
+     * @throws IOException
+     */
+    private void read(final PlyReader plyReader, final Mesh mesh) throws IOException {
 	// Data holders.
 	TIntLongHashMap vertexRowMap = null;
 	List<int[]> triangles = null;
@@ -102,7 +147,6 @@ public class PLYMeshIO extends AbstractIOPlugin<Mesh> implements MeshIOPlugin {
 
 	    reader.close();
 	}
-	plyReader.close();
 
 	// Test.
 	if (vertexRowMap == null)
@@ -120,17 +164,6 @@ public class PLYMeshIO extends AbstractIOPlugin<Mesh> implements MeshIOPlugin {
 	    final float nz = 0f;
 	    mesh.triangles().add(v1, v2, v3, nx, ny, nz);
 	}
-    }
-
-    private List<int[]> readTriangles(final ElementReader reader) throws IOException {
-	final List<int[]> triangles = new ArrayList<>(reader.getCount());
-	Element triangle = reader.readElement();
-	while (triangle != null) {
-	    final int[] indices = triangle.getIntList("vertex_index");
-	    triangles.add(indices);
-	    triangle = reader.readElement();
-	}
-	return triangles;
     }
 
     private TIntLongHashMap readVertices(final ElementReader reader, final Vertices vertices) throws IOException {
