@@ -7,13 +7,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -35,12 +35,14 @@ import static org.junit.Assume.assumeTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import net.imagej.mesh.Mesh;
-
 import org.junit.Test;
+
+import net.imagej.mesh.Mesh;
+import net.imagej.mesh.naive.NaiveFloatMesh;
 
 /**
  * Tests {@link PLYMeshIO}.
@@ -50,37 +52,58 @@ import org.junit.Test;
  */
 public class PLYMeshIOTest {
 
-	@Test
-	public void testOpen() throws Exception {
-		final PLYMeshIO meshIO = new PLYMeshIO();
-		final Mesh m = sampleMesh(meshIO);
-		assertEquals(158, m.triangles().size());
-		assertEquals(81, m.vertices().size());
-	}
+    @Test
+    public void testOpenInputStream() throws Exception {
+	final URI meshURI = getClass().getResource("cone.ply").toURI();
+	final InputStream is = meshURI.toURL().openStream();
+	final PLYMeshIO meshIO = new PLYMeshIO();
+	final Mesh m = meshIO.open(is);
+	assertEquals(158, m.triangles().size());
+	assertEquals(81, m.vertices().size());
+    }
 
-	@Test
-	public void testBinaryWrite() throws Exception {
-		final PLYMeshIO meshIO = new PLYMeshIO();
-		final Mesh mesh = sampleMesh(meshIO);
-		final byte[] bytes = meshIO.writeBinary(mesh);
-		assertEquals(5287, bytes.length);
-	}
+    @Test
+    public void testInputStream() throws Exception {
+	final URI meshURI = getClass().getResource("cone.ply").toURI();
+	final InputStream is = meshURI.toURL().openStream();
+	final Mesh m = new NaiveFloatMesh();
+	final PLYMeshIO meshIO = new PLYMeshIO();
+	meshIO.read(is, m);
+	assertEquals(158, m.triangles().size());
+	assertEquals(81, m.vertices().size());
+    }
 
-	@Test
-	public void testAsciiWrite() throws Exception {
-		final PLYMeshIO meshIO = new PLYMeshIO();
-		final Mesh mesh = sampleMesh(meshIO);
-		final byte[] bytes = meshIO.writeAscii(mesh);
-		assertEquals(7420, bytes.length);
-	}
+    @Test
+    public void testOpen() throws Exception {
+	final PLYMeshIO meshIO = new PLYMeshIO();
+	final Mesh m = sampleMesh(meshIO);
+	assertEquals(158, m.triangles().size());
+	assertEquals(81, m.vertices().size());
+    }
 
-	// -- Helper methods --
+    @Test
+    public void testBinaryWrite() throws Exception {
+	final PLYMeshIO meshIO = new PLYMeshIO();
+	final Mesh mesh = sampleMesh(meshIO);
+	final byte[] bytes = meshIO.writeBinary(mesh);
+	assertEquals(5287, bytes.length);
+    }
 
-	private Mesh sampleMesh(final PLYMeshIO meshIO) throws URISyntaxException,
-		IOException
-	{
-		final URI meshURI = getClass().getResource("cone.ply").toURI();
-		assumeTrue(new File(meshURI).exists());
-		return meshIO.open(meshURI.getPath());
-	}
+    @Test
+    public void testAsciiWrite() throws Exception {
+	final PLYMeshIO meshIO = new PLYMeshIO();
+	final Mesh mesh = sampleMesh(meshIO);
+	final byte[] bytes = meshIO.writeAscii(mesh);
+	assertEquals(7420, bytes.length);
+    }
+
+    // -- Helper methods --
+
+    private Mesh sampleMesh(final PLYMeshIO meshIO) throws URISyntaxException,
+    IOException
+    {
+	final URI meshURI = getClass().getResource("cone.ply").toURI();
+	assumeTrue(new File(meshURI).exists());
+	return meshIO.open(meshURI.getPath());
+    }
 }
