@@ -45,6 +45,8 @@ import net.imagej.mesh.io.MeshIOPlugin;
 import net.imagej.mesh.naive.NaiveFloatMesh;
 
 import org.scijava.io.AbstractIOPlugin;
+import org.scijava.io.location.FileLocation;
+import org.scijava.io.location.Location;
 import org.scijava.plugin.Plugin;
 import org.scijava.util.FileUtils;
 import org.smurn.jply.Element;
@@ -269,29 +271,34 @@ public class PLYMeshIO extends AbstractIOPlugin<Mesh> implements MeshIOPlugin {
 		return os.toByteArray();
 	}
 
+	// -- MeshIOPlugin methods --
+
+	@Override
+	public String extension() {
+		return "ply";
+	}
+
 	// -- IOPlugin methods --
 
 	@Override
-	public boolean supportsOpen(final String source) {
-		return FileUtils.getExtension(source).toLowerCase().equals(EXTENSION);
-	}
-
-	@Override
-	public boolean supportsSave(final String source) {
-		return FileUtils.getExtension(source).toLowerCase().equals(EXTENSION);
-	}
-
-	@Override
-	public Mesh open(final String source) throws IOException {
+	public Mesh open(final Location location) throws IOException {
+		if (!(location instanceof FileLocation)) {
+			throw new UnsupportedOperationException("Not a file: " + location.getClass().getName());
+		}
+		final FileLocation fileLocation = (FileLocation) location;
 		final Mesh mesh = new NaiveFloatMesh();
-		read(new File(source), mesh);
+		read(fileLocation.getFile(), mesh);
 		return mesh;
 	}
 
 	@Override
-	public void save(final Mesh data, final String destination) throws IOException {
+	public void save(final Mesh data, final Location location) throws IOException {
+		if (!(location instanceof FileLocation)) {
+			throw new UnsupportedOperationException("Not a file: " + location.getClass().getName());
+		}
+		final FileLocation fileLocation = (FileLocation) location;
 		final byte[] bytes = writeBinary(data);
-		FileUtils.writeFile(new File(destination), bytes);
+		FileUtils.writeFile(fileLocation.getFile(), bytes);
 	}
 
 	String EXTENSION = "ply";

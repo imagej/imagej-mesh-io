@@ -42,8 +42,47 @@ import org.scijava.io.IOPlugin;
  */
 public interface MeshIOPlugin extends IOPlugin<Mesh> {
 
+	String extension();
+
 	@Override
 	default Class<Mesh> getDataType() {
 		return Mesh.class;
+	}
+
+	@Override
+	public boolean supportsOpen(final Location location) {
+		if (!(location instanceof FileLocation)) return false;
+		final FileLocation fileLocation = (FileLocation) location;
+		final String source = fileLocation.getFile().getAbsolutePath();
+		return FileUtils.getExtension(source).toLowerCase().equals(EXTENSION);
+	}
+
+	@Override
+	public boolean supportsSave(final Location location) {
+		if (!(location instanceof FileLocation)) return false;
+		final FileLocation fileLocation = (FileLocation) location;
+		final String destination = fileLocation.getFile().getAbsolutePath();
+		return FileUtils.getExtension(destination).toLowerCase().equals(EXTENSION);
+	}
+
+	@Override
+	public Mesh open(final Location location) throws IOException {
+		if (!(location instanceof FileLocation)) {
+			throw new UnsupportedOperationException("Not a file: " + location.getClass().getName());
+		}
+		final FileLocation fileLocation = (FileLocation) location;
+		final Mesh mesh = new NaiveFloatMesh();
+		read(fileLocation.getFile(), mesh);
+		return mesh;
+	}
+
+	@Override
+	public void save(final Mesh data, final Location location) throws IOException {
+		if (!(location instanceof FileLocation)) {
+			throw new UnsupportedOperationException("Not a file: " + location.getClass().getName());
+		}
+		final FileLocation fileLocation = (FileLocation) location;
+		final byte[] bytes = writeBinary(data);
+		FileUtils.writeFile(fileLocation.getFile(), bytes);
 	}
 }
